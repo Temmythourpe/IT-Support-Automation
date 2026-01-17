@@ -1,0 +1,7 @@
+curl -X POST http://localhost:5678/webhook-test/support-ticket \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Cannot access email",
+    "description": "I have been trying to log into my email for the past hour but keep getting an error message saying invalid password. I reset it twice already but still cannot get in. This is urgent as I need to send reports to my manager.",
+    "user": "john.doe@company.com"
+  }

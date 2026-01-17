@@ -1,0 +1,24 @@
+# Credentials and secrets
+.env
+*.key
+credentials/
+
+# n8n data
+.n8n/
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+temp/

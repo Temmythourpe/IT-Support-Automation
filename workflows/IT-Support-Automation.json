@@ -1,0 +1,390 @@
+{
+  "name": "IT Support Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        -192
+      ],
+      "id": "0864523e-7bb5-4f11-8662-d5f847f4a3fd",
+      "name": "Webhook",
+      "webhookId": "f37a217c-cab5-495c-81bc-e568b5aabc03"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the Groq/AI response - handle different response structures\nlet aiResponse;\nif (items[0].json.choices && items[0].json.choices[0]) {\n  aiResponse = items[0].json.choices[0].message.content;\n} else if (items[0].json.message) {\n  aiResponse = items[0].json.message.content;\n} else {\n  aiResponse = items[0].json.content || JSON.stringify(items[0].json);\n}\n\n// Parse the JSON from AI\nconst analysis = JSON.parse(aiResponse);\n\n// Get original ticket data from the webhook\nconst ticketData = $node[\"Webhook\"].json.body;\n\nreturn [{\n  json: {\n    original_ticket: ticketData,\n    ai_analysis: analysis,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -192
+      ],
+      "id": "9edfa574-81d9-4bca-ac22-38b72a092500",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "64188ac0-1484-4de5-825e-c7af80e72a3e",
+              "leftValue": "={{$json.ai_analysis.category}}",
+              "rightValue": "password_reset",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        -192
+      ],
+      "id": "0a297be0-7321-4679-95a1-388bb6c8c856",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticket = items[0].json.original_ticket;\nconst analysis = items[0].json.ai_analysis;\n\nconst autoResponse = {\n  ticket_id: `TICKET-${Date.now()}`,\n  user: ticket.user,\n  status: \"auto_resolved\",\n  category: analysis.category,\n  priority: analysis.priority,\n  response_message: `Hi,\n\nWe've received your password reset request. Here are the steps:\n\n1. Go to: https://password-reset.company.com\n2. Enter your email: ${ticket.user}\n3. Check your email for the reset link\n4. Create a new strong password\n\nIf you continue having issues after resetting, please reply to this ticket.\n\nBest regards,\nIT Support (Automated)`,\n  resolution_time: \"immediate\",\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: autoResponse }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -288
+      ],
+      "id": "4ea7855a-c06e-432f-a742-23c03efe3258",
+      "name": "Auto Response - Password Reset"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticket = items[0].json.original_ticket;\nconst analysis = items[0].json.ai_analysis;\n\nconst humanReview = {\n  ticket_id: `TICKET-${Date.now()}`,\n  user: ticket.user,\n  status: \"pending_human_review\",\n  category: analysis.category,\n  priority: analysis.priority,\n  ai_suggestion: analysis.suggested_solution,\n  sentiment: analysis.sentiment,\n  needs_escalation: analysis.priority === \"critical\" || analysis.sentiment === \"frustrated\",\n  response_message: `Hi,\n\nThank you for contacting IT Support. We've received your request regarding \"${ticket.title}\".\n\nA support technician will review your ticket and respond within:\n- Critical: 1 hour\n- High: 4 hours  \n- Medium: 1 business day\n- Low: 2 business days\n\nYour ticket has been categorized as: ${analysis.category} (${analysis.priority} priority)\n\nTicket ID: TICKET-${Date.now()}\n\nBest regards,\nIT Support`,\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: humanReview }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -96
+      ],
+      "id": "3b11963d-9131-42ac-9402-0259baf3cab6",
+      "name": "Route to Human Support"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        -288
+      ],
+      "id": "48b4973a-d4aa-4cb5-85b8-5ea586ab641c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1weAXjEUvMdoBWPipMdV8O1aUs_5nkxH1YEp3wru7mfw",
+          "mode": "list",
+          "cachedResultName": "IT Support Ticket",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1weAXjEUvMdoBWPipMdV8O1aUs_5nkxH1YEp3wru7mfw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1weAXjEUvMdoBWPipMdV8O1aUs_5nkxH1YEp3wru7mfw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket_ID": "={{$json.ticket_id}}",
+            "User": "={{$json.user}}",
+            "Category": "={{$json.category}}",
+            "Priority": "={{$json.priority}}",
+            "Status": "={{$json.status}}",
+            "Sentiment": "={{$json.sentiment}}",
+            "Timestamp": "={{$json.timestamp}}"
+          },
+          "matchingColumns": [
+            "Ticket_ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket_ID",
+              "displayName": "Ticket_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User",
+              "displayName": "User",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        -288
+      ],
+      "id": "87a27b4b-f14f-4521-8a4d-cae7a991b517",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Sr2YDxELjCEz7vH6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Analyze this IT support ticket and respond ONLY with valid JSON:\\n\\nTitle: {{$json.body.title}}\\nDescription: {{$json.body.description}}\\nUser: {{$json.body.user}}\\n\\nReturn this exact JSON structure:\\n{\\n  \\\"category\\\": \\\"password_reset or software_install or hardware or network or other\\\",\\n  \\\"priority\\\": \\\"low or medium or high or critical\\\",\\n  \\\"sentiment\\\": \\\"frustrated or neutral or urgent\\\",\\n  \\\"suggested_solution\\\": \\\"brief solution\\\",\\n  \\\"needs_human\\\": true or false\\n}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -208,
+        -192
+      ],
+      "id": "27a2f605-8a8e-4500-ae53-0909216f47ed",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "JwOchjWAgtxmcZcf",
+          "name": "Header Auth account 7"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "user-agent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.5074",
+            "content-type": "application/json",
+            "host": "localhost:5678",
+            "content-length": "261",
+            "expect": "100-continue"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "title": "Laptop screen is flickering",
+            "description": "My laptop screen has been flickering constantly for the past two days. It gets worse when I open multiple applications. I have tried restarting but the issue persists.",
+            "user": "sarah.jones@company.com"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/support-ticket",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Auto Response - Password Reset",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route to Human Support",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Response - Password Reset": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route to Human Support": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "983310aa-a33e-4da0-8da9-52df18d5140f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e891a0fc3efafbe4ac6eecb85ae1c141ded72aaa44b34a8ec08b1fd2af6aa4b"
+  },
+  "id": "P4oHCN8YWZRMw8FOsm5Bp",
+  "tags": []
+}
