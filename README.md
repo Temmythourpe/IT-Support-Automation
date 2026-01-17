@@ -1,5 +1,10 @@
 # AI-Powered IT Support Automation
 
+![n8n](https://img.shields.io/badge/n8n-Workflow-EA4B71?logo=n8n)
+![Groq](https://img.shields.io/badge/Groq-AI-orange)
+![Google Sheets](https://img.shields.io/badge/Google-Sheets-34A853?logo=googlesheets)
+![Status](https://img.shields.io/badge/status-active-success)
+
 An intelligent IT support ticketing system that uses AI to automatically triage, categorize, and resolve common support requests, reducing response time and improving efficiency.
 
 ## Features
