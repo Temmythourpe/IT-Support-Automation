@@ -29,7 +29,7 @@ Access n8n at `http://localhost:5678` (local) or your cloud URL.
 
 ### Google OAuth Credentials
 1. Go to https://console.cloud.google.com
-2. Create a new project or select existing
+2. Create a new project or select an existing one
 3. Enable **Google Sheets API**
 4. Go to **Credentials** → **Create Credentials** → **OAuth Client ID**
 5. Choose **Desktop app**
@@ -50,7 +50,7 @@ Access n8n at `http://localhost:5678` (local) or your cloud URL.
 3. Select **Header Auth**
 4. **Name**: `Authorization`
 5. **Value**: `Bearer YOUR_GROQ_API_KEY` (replace with your actual key)
-6. Save credential
+6. Save credentials
 
 ### B. Google Sheets
 1. Click on **Google Sheets** node
@@ -68,7 +68,7 @@ Access n8n at `http://localhost:5678` (local) or your cloud URL.
    Ticket ID | User | Category | Priority | Status | Sentiment | Timestamp
 ```
 3. Copy the Sheet ID from the URL (the long string between `/d/` and `/edit`)
-4. In n8n Google Sheets node, select this spreadsheet
+4. In the n8n Google Sheets node, select this spreadsheet
 
 ## Step 6: Activate Workflow
 
@@ -85,7 +85,7 @@ curl -X POST YOUR_WEBHOOK_URL \
   -d '{
     "title": "Forgot my password",
     "description": "I need to reset my password urgently",
-    "user": "test@company.com"
+    "user": "test@mylab.com"
   }'
 ```
 
@@ -96,29 +96,29 @@ curl -X POST YOUR_WEBHOOK_URL \
   -d '{
     "title": "Laptop screen flickering",
     "description": "My screen flickers when opening applications",
-    "user": "test@company.com"
+    "user": "test@mylab.com"
   }'
 ```
 
 **Expected Results:**
 - Password reset → Status: `auto_resolved`
 - Hardware issue → Status: `pending_human_review`
-- Both logged in Google Sheets
+- Both logged in to Google Sheets
 
 ## Monitoring
 
 - Check **Executions** tab in n8n for execution history
-- Review Google Sheet for all logged tickets
+- Review the Google Sheet for all logged tickets
 - Monitor for errors in the workflow
 
 ## Troubleshooting
 
 ### API Key Errors
-- Verify Groq API key is correct and active
+- Verify the Groq API key is correct and active
 - Ensure `Bearer ` prefix is included with one space
 
 ### Google Sheets Not Updating
-- Check OAuth connection is active
+- Check the OAuth connection is active
 - Verify sheet name and ID are correct
 - Ensure columns are mapped properly
 
