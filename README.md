@@ -76,7 +76,7 @@ See [SETUP.md](SETUP.md) for detailed installation steps.
 **Human Review Ticket (Hardware Issue):**
 - Status: `pending_human_review`
 - AI provides diagnostic suggestions
-- Routed to technical support team
+- Routed to the technical support team
 
 ## Security Notes
 
@@ -97,3 +97,7 @@ See [SETUP.md](SETUP.md) for detailed installation steps.
 ## Contributing
 
 Contributions welcome! Please open an issue or submit a pull request.
+
+<p align="center">
+  <em>⭐ If you find this project helpful, please star the repository!</em>
+</p>
